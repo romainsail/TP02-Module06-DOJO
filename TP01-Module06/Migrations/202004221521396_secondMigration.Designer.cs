@@ -7,13 +7,13 @@ namespace TP01_Module06.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.1.3-40302")]
-    public sealed partial class firstmigration : IMigrationMetadata
+    public sealed partial class secondMigration : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(firstmigration));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(secondMigration));
         
         string IMigrationMetadata.Id
         {
-            get { return "202004211311105_first-migration"; }
+            get { return "202004221521396_secondMigration"; }
         }
         
         string IMigrationMetadata.Source

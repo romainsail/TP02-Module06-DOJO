@@ -42,7 +42,18 @@ namespace TP01_Module06.Controllers
         {
             SamouraiVM vm = new SamouraiVM();
 
-            vm.Armes = db.Armes.ToList();
+            //On affiche que les armes disponibles, c a d non attachées à un Samourai
+            List<Arme> armesDispo = new List<Arme>();
+            foreach (var arme in db.Armes.ToList())
+            {
+                if (!db.Samourais.Any(s => s.Arme.Id == arme.Id))
+                {
+                    armesDispo.Add(arme);
+                }
+            }
+
+            vm.Armes = armesDispo.Select(a => new SelectListItem { Text = a.Nom, Value = a.Id.ToString() }).ToList(); 
+            vm.ArtMartials = db.ArtMartials.Select(a => new SelectListItem { Text = a.Nom, Value = a.Id.ToString() }).ToList(); 
             return View(vm);
         }
 
@@ -56,6 +67,9 @@ namespace TP01_Module06.Controllers
             if (ModelState.IsValid)
             {
                 samouraiVM.Samourai.Arme = db.Armes.FirstOrDefault(a => a.Id == samouraiVM.IdSelectedArme.Value);
+
+                samouraiVM.Samourai.ArtMartials = db.ArtMartials.Where(
+                        x => samouraiVM.IdsArtMartial.Contains(x.Id)).ToList();
 
                 db.Samourais.Add(samouraiVM.Samourai);
                 db.SaveChanges();
@@ -78,12 +92,31 @@ namespace TP01_Module06.Controllers
                 return HttpNotFound();
             }
             SamouraiVM vm = new SamouraiVM();
-            vm.Armes = db.Armes.ToList();
+            vm.ArtMartials = db.ArtMartials.Select(a => new SelectListItem { Text = a.Nom, Value = a.Id.ToString() }).ToList();
             vm.Samourai = samourai;
 
+            //On affiche que les armes disponibles, c a d non attachées à un Samourai
+            List<Arme> armesDispo = new List<Arme>();
+            foreach (var arme in db.Armes.ToList())
+            {
+                if (!db.Samourais.Any(s => s.Arme.Id == arme.Id))
+                {
+                    armesDispo.Add(arme);
+                }
+            }
+
+            //Preselection de l'arme choisie lors de la création
             if (samourai.Arme != null)
             {
+                armesDispo.Add(db.Armes.FirstOrDefault(a => a.Id == samourai.Arme.Id));
                 vm.IdSelectedArme = samourai.Arme.Id;
+            }
+
+            vm.Armes = armesDispo.Select(a => new SelectListItem { Text = a.Nom, Value = a.Id.ToString() }).ToList();
+
+            if (vm.Samourai.ArtMartials.Any())
+            {
+                vm.IdsArtMartial = vm.Samourai.ArtMartials.Select(x => x.Id).ToList();
             }
 
             return View(vm);
@@ -106,6 +139,20 @@ namespace TP01_Module06.Controllers
                     samourai.Arme = db.Armes.FirstOrDefault(a => a.Id == vm.IdSelectedArme.Value);
                 }
 
+                if (vm.IdsArtMartial != null)
+                {
+                    foreach (var artMartial in samourai.ArtMartials)
+                    {
+                        foreach (var idArtMartial in vm.IdsArtMartial)
+                        {
+                            if (!(artMartial.Id == idArtMartial))
+                            {
+                                samourai.ArtMartials = db.ArtMartials.Where(a => vm.IdsArtMartial.Contains(a.Id)).ToList();
+                            }
+                        }
+                    }
+                    
+                }
 
                 db.Entry(samourai).State = EntityState.Modified;
                 db.SaveChanges();

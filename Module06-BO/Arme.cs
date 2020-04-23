@@ -1,8 +1,9 @@
-﻿namespace BO
+﻿using Module06_BO;
+
+namespace BO
 {
-    public class Arme
+    public class Arme : AbstractClasse
     {
-        public int Id { get; set; }
         public string Nom { get; set; }
         public int Degats { get; set; }
     }
